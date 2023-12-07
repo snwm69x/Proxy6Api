@@ -1,14 +1,10 @@
 package com.snwm.api;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.snwm.enums.Country;
 import com.snwm.enums.ErrorCode;
 import com.snwm.enums.ProxyState;
