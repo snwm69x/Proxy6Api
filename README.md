@@ -1,5 +1,4 @@
 # Proxy6Api
-## Proxy6.net API Java Implementation
 
 ### Способы создания клиента для работы с API:
 - 1 вариант (Через статический метод)
