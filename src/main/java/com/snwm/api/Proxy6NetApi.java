@@ -2,6 +2,7 @@ package com.snwm.api;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
@@ -490,5 +491,13 @@ public class Proxy6NetApi {
             }
             return gson.fromJson(responseBody, IpAuthResponse.class);
         }
+    }
+
+    public static Proxy6NetApi createWithApiKey(String apiKey) {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .build();
+        return new Proxy6NetApi(apiKey, client);
     }
 }
