@@ -1,13 +1,9 @@
 package com.snwm;
 
-import com.snwm.enums.ProxyType;
+import com.snwm.api.Proxy6NetApi;
 
-/**
- * Hello world!
- *
- */
 public class App {
     public static void main(String[] args) {
-        System.out.println(ProxyType.SOCKS5.getCode());
+        Proxy6NetApi api = Proxy6NetApi.createWithApiKey("your-api-key");
     }
 }

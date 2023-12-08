@@ -1,21 +1,17 @@
 package com.snwm.api;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.snwm.enums.Country;
-import com.snwm.enums.ErrorCode;
 import com.snwm.enums.ProxyState;
 import com.snwm.enums.ProxyType;
 import com.snwm.enums.ProxyVersion;
-import com.snwm.exception.ApiException;
 import com.snwm.objects.BuyResponse;
 import com.snwm.objects.CheckResponse;
 import com.snwm.objects.DeleteResponse;
-import com.snwm.objects.ErrorResponse;
 import com.snwm.objects.GetCountResponse;
 import com.snwm.objects.GetCountryResponse;
 import com.snwm.objects.GetPriceResponse;
@@ -28,7 +24,6 @@ import com.snwm.objects.SetTypeResponse;
 import lombok.RequiredArgsConstructor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 @RequiredArgsConstructor
 public class Proxy6NetApi {
@@ -47,10 +42,10 @@ public class Proxy6NetApi {
     private static final String IP_AUTH = "/ipauth";
 
     private final String apiKey;
-    private final OkHttpClient client;
-    private final Gson gson = new Gson();
 
-    public GetPriceResponse getPrice(int count, int period, ProxyVersion version) throws IOException {
+    private final ApiRequestHandler requestHandler;
+
+    public GetPriceResponse getPrice(int count, int period, ProxyVersion version) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + GET_PRICE);
         urlBuilder
                 .append("?count=")
@@ -63,30 +58,18 @@ public class Proxy6NetApi {
                     .append(version.getCode());
         }
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, GetPriceResponse.class);
-        }
+        return requestHandler.execute(request, GetPriceResponse.class);
     }
 
-    public GetPriceResponse getPrice(int count, int period) throws IOException {
+    public GetPriceResponse getPrice(int count, int period) {
         return getPrice(count, period, ProxyVersion.IPV6);
     }
 
-    public GetCountResponse getCount(Country country, ProxyVersion version) throws IOException {
+    public GetCountResponse getCount(Country country, ProxyVersion version) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + GET_COUNT);
         urlBuilder
                 .append("?country=")
@@ -97,59 +80,34 @@ public class Proxy6NetApi {
                     .append(version.getCode());
         }
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, GetCountResponse.class);
-        }
+        return requestHandler.execute(request, GetCountResponse.class);
     }
 
-    public GetCountResponse getCount(Country country) throws IOException {
+    public GetCountResponse getCount(Country country) {
         return getCount(country, ProxyVersion.IPV6);
     }
 
-    public GetCountryResponse getCountry(ProxyVersion version) throws IOException {
+    public GetCountryResponse getCountry(ProxyVersion version) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + GET_COUNTRY);
         urlBuilder.append("?version=")
                 .append(version.getCode());
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, GetCountryResponse.class);
-        }
+        return requestHandler.execute(request, GetCountryResponse.class);
     }
 
-    public GetCountryResponse getCountry() throws IOException {
+    public GetCountryResponse getCountry() {
         return getCountry(ProxyVersion.IPV6);
     }
 
-    public GetProxyResponse getProxy(ProxyState state, String descr, Integer page, Integer limit)
-            throws IOException {
+    public GetProxyResponse getProxy(ProxyState state, String descr, Integer page, Integer limit) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + GET_PROXY);
 
         if (state != null) {
@@ -174,42 +132,30 @@ public class Proxy6NetApi {
             urlBuilder.append("&limit=1000");
         }
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, GetProxyResponse.class);
-        }
+        return requestHandler.execute(request, GetProxyResponse.class);
     }
 
-    public GetProxyResponse getProxy() throws IOException {
+    public GetProxyResponse getProxy() {
         return getProxy(null, null, null, null);
     }
 
-    public GetProxyResponse getProxy(ProxyState state) throws IOException {
+    public GetProxyResponse getProxy(ProxyState state) {
         return getProxy(state, null, null, null);
     }
 
-    public GetProxyResponse getProxy(ProxyState state, String descr) throws IOException {
+    public GetProxyResponse getProxy(ProxyState state, String descr) {
         return getProxy(state, descr, null, null);
     }
 
-    public GetProxyResponse getProxy(ProxyState state, String descr, Integer limit) throws IOException {
+    public GetProxyResponse getProxy(ProxyState state, String descr, Integer limit) {
         return getProxy(state, descr, null, limit);
     }
 
-    public SetTypeResponse setType(ProxyType type, int... ids) throws IOException {
+    public SetTypeResponse setType(ProxyType type, int... ids) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + SET_TYPE);
 
         String idsParam = Arrays.stream(ids)
@@ -219,26 +165,14 @@ public class Proxy6NetApi {
         urlBuilder.append("?ids=").append(idsParam);
         urlBuilder.append("&type=").append(type.getCode());
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, SetTypeResponse.class);
-        }
+        return requestHandler.execute(request, SetTypeResponse.class);
     }
 
-    public SetDescrResponse setDescription(String newDescr, String oldDescr, int... ids) throws IOException {
+    public SetDescrResponse setDescription(String newDescr, String oldDescr, int... ids) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + SET_DESCR);
 
         String idsParam = Arrays.stream(ids)
@@ -255,36 +189,23 @@ public class Proxy6NetApi {
 
         urlBuilder.append("&new=").append(newDescr);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, SetDescrResponse.class);
-        }
+        return requestHandler.execute(request, SetDescrResponse.class);
     }
 
-    public SetDescrResponse setDescription(String newDescr, int... ids) throws IOException {
+    public SetDescrResponse setDescription(String newDescr, int... ids) {
         return setDescription(newDescr, null, ids);
     }
 
-    public SetDescrResponse setDescription(String newDescr, String oldDescr) throws IOException {
+    public SetDescrResponse setDescription(String newDescr, String oldDescr) {
         return setDescription(newDescr, oldDescr);
     }
 
     public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version, ProxyType type,
-            String descr, Boolean autoProlong)
-            throws IOException {
+            String descr, Boolean autoProlong) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + BUY_PROXY);
         urlBuilder
                 .append("?count=").append(count)
@@ -311,52 +232,35 @@ public class Proxy6NetApi {
             urlBuilder.append("&auto_prolong");
         }
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, BuyResponse.class);
-        }
+        return requestHandler.execute(request, BuyResponse.class);
     }
 
-    public BuyResponse buyProxy(Integer count, Integer period, Country country)
-            throws IOException {
+    public BuyResponse buyProxy(Integer count, Integer period, Country country) {
         return buyProxy(count, period, country, null, null, null, null);
     }
 
-    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version)
-            throws IOException {
+    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version) {
         return buyProxy(count, period, country, version, null, null, null);
     }
 
-    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyType type)
-            throws IOException {
+    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyType type) {
         return buyProxy(count, period, country, null, type, null, null);
     }
 
-    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version, ProxyType type)
-            throws IOException {
+    public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version, ProxyType type) {
         return buyProxy(count, period, country, version, type, null, false);
     }
 
     public BuyResponse buyProxy(Integer count, Integer period, Country country, ProxyVersion version, ProxyType type,
-            String descr)
-            throws IOException {
+            String descr) {
         return buyProxy(count, period, country, version, type, descr, false);
     }
 
-    public ProlongResponse prolongProxy(Integer period, int... ids) throws IOException {
+    public ProlongResponse prolongProxy(Integer period, int... ids) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + PROLONG_PROXY);
 
         String idsParam = Arrays.stream(ids)
@@ -366,26 +270,14 @@ public class Proxy6NetApi {
         urlBuilder.append("?period=").append(period);
         urlBuilder.append("&ids=").append(idsParam);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-
-            return gson.fromJson(responseBody, ProlongResponse.class);
-        }
+        return requestHandler.execute(request, ProlongResponse.class);
     }
 
-    public DeleteResponse deleteProxy(int... ids) throws IOException {
+    public DeleteResponse deleteProxy(int... ids) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + DELETE);
 
         String idsParam = Arrays.stream(ids)
@@ -394,48 +286,26 @@ public class Proxy6NetApi {
 
         urlBuilder.append("?ids=").append(idsParam);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-            return gson.fromJson(responseBody, DeleteResponse.class);
-        }
+        return requestHandler.execute(request, DeleteResponse.class);
     }
 
-    public DeleteResponse deleteProxy(String descr) throws IOException {
+    public DeleteResponse deleteProxy(String descr) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + DELETE);
 
         urlBuilder.append("?descr=").append(descr);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-            return gson.fromJson(responseBody, DeleteResponse.class);
-        }
+        return requestHandler.execute(request, DeleteResponse.class);
     }
 
-    public CheckResponse checkProxy(int... ids) throws IOException {
+    public CheckResponse checkProxy(int... ids) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + CHECK);
 
         String idsParam = Arrays.stream(ids)
@@ -444,25 +314,14 @@ public class Proxy6NetApi {
 
         urlBuilder.append("?ids=").append(idsParam);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-            return gson.fromJson(responseBody, CheckResponse.class);
-        }
+        return requestHandler.execute(request, CheckResponse.class);
     }
 
-    public IpAuthResponse ipAuth(String... ipOrDelete) throws IOException {
+    public IpAuthResponse ipAuth(String... ipOrDelete) {
         StringBuilder urlBuilder = new StringBuilder(API_URL + apiKey + IP_AUTH);
 
         String ipParam;
@@ -475,22 +334,11 @@ public class Proxy6NetApi {
 
         urlBuilder.append("?ip=").append(ipParam);
 
-        String url = urlBuilder.toString();
-
         Request request = new Request.Builder()
-                .url(url)
+                .url(urlBuilder.toString())
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            ErrorResponse errorResponse = gson.fromJson(responseBody, ErrorResponse.class);
-            if ("no".equals(errorResponse.getStatus())) {
-                ErrorCode errorCode = ErrorCode.fromCode(errorResponse.getErrorId());
-                throw new ApiException(errorCode);
-            }
-            return gson.fromJson(responseBody, IpAuthResponse.class);
-        }
+        return requestHandler.execute(request, IpAuthResponse.class);
     }
 
     public static Proxy6NetApi createWithApiKey(String apiKey) {
@@ -498,6 +346,11 @@ public class Proxy6NetApi {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .build();
-        return new Proxy6NetApi(apiKey, client);
+
+        Gson gson = new Gson();
+        ApiRequestHandler requestHandler = new ApiRequestHandler(client, gson);
+
+        return new Proxy6NetApi(apiKey, requestHandler);
     }
+
 }
