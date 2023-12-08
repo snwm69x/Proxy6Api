@@ -1,4 +1,4 @@
-package com.snwm.objects;
+package com.snwm.objects.response;
 
 import com.google.gson.annotations.SerializedName;
 

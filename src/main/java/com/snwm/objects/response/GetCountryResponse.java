@@ -1,4 +1,4 @@
-package com.snwm.objects;
+package com.snwm.objects.response;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package com.snwm.objects;
+package com.snwm.objects.response;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CheckResponse extends ApiResponse {
+public class CheckProxyResponse extends ApiResponse {
     @SerializedName("proxy_id")
     private int proxyId;
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.google.gson.Gson;
 import com.snwm.enums.ErrorCode;
 import com.snwm.exception.ApiException;
-import com.snwm.objects.ErrorResponse;
+import com.snwm.objects.response.ErrorResponse;
 
 import lombok.RequiredArgsConstructor;
 import okhttp3.OkHttpClient;

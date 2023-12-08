@@ -1,4 +1,4 @@
-package com.snwm.objects;
+package com.snwm.objects.response;
 
 import java.util.ArrayList;
 import java.util.List;
